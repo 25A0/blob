@@ -128,6 +128,7 @@ Blob.types = {
   end,
   word = "c2",
   dword = "c4",
+  zerostring = "s",
   
 }
 
