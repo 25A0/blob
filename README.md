@@ -159,6 +159,15 @@ values. They can be captured in various ways:
     in-place string formatting with `string.format(formatstring, ...)` and
     calculates the size of the resulting string.
 
+#### Offset
+
+If you need to change the offset manually, use `blob:seek(pos)` to move to a
+certain position. You can also directly read or write `blob.pos`, which contains
+the current offset.
+
+The offset is handled in Lua's 1-based indexing, so that the very first byte is
+at offset 1.
+
 ### Custom types
 
 The module `Blob` contains an array `types` where custom types are stored.
