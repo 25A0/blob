@@ -157,7 +157,8 @@ values. They can be captured in various ways:
     byte(s) (that is, the most-significant bit of the next byte will be parsed
     first). All `numbits` will be returned as boolean values. 
 
-    This advances the offset by the minimum number of bytes that are necessary
+    This also works for more than eight bits at once, and advances the offset
+    by the minimum number of bytes that are necessary
     to capture all bits (e.g. reading 12 bits will advance the offset by two
     bytes). Thus, each call of `bits` will advance the offset by at least one
     byte.
