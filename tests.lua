@@ -171,6 +171,7 @@ do
   assert(Blob:size(Blob.types.bytes(4)) == 4)
   assert(Blob:size(Blob.types.bytes(4) .. "c6") == 10)
   assert(Blob:size("c%d", 12) == 12)
+  assert(Blob:size(Blob.types.dword) == 4)
 end
 
 -- Test offset and splitting

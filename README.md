@@ -141,7 +141,6 @@ values. They can be captured in various ways:
  - `blob:size(formatstring)` returns the size of the given format string.
  	This function does not work for format strings containing zero-terminated
  	or size-prefixed strings.
- 	Currently this function does not support custom types, either.
  - `blob:size(formatstring, ...)` similar to the simple `size` call, but does
  	in-place string formatting with `string.format(formatstring, ...)` and
  	calculates the size of the resulting string.
@@ -178,6 +177,13 @@ Custom types can also be used for padding (see below).
 
 Custom types are always shared between instances, no matter if they are stored
 in `blob.types` or `Blob.types`.
+
+Use custom types in `size` like so:
+
+```lua
+	local s1 = blob:size(Blob.types.bytes(16))
+	local s2 = blob:size(Blob.types.dword)
+```
 
 ### Rollback and Markers
 
@@ -331,5 +337,4 @@ local riff = parse_riff(blob)
 ## TODO
 
  - stateful endianness
- - support custom types in `size`
  - support custom types and format strings in `array`
