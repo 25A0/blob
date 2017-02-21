@@ -142,6 +142,9 @@ values. They can be captured in various ways:
  	This function does not work for format strings containing zero-terminated
  	or size-prefixed strings.
  	Currently this function does not support custom types, either.
+ - `blob:size(formatstring, ...)` similar to the simple `size` call, but does
+ 	in-place string formatting with `string.format(formatstring, ...)` and
+ 	calculates the size of the resulting string.
  - `blob:array(count, fun)` Parse a list of `count` elements by repeatedly parsing
  	the blob using `fun`. The passed function should accept a `blob` and return
  	whatever it parsed. See the tour above for an example.
@@ -329,5 +332,4 @@ local riff = parse_riff(blob)
 
  - stateful endianness
  - support custom types in `size`
- - support in-place string formatting for `size`
  - support custom types and format strings in `array`
