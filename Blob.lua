@@ -1,4 +1,24 @@
-local struct = require("struct")
+local lib = {}
+if string.packsize and string.unpack then
+  lib.size = string.packsize
+  lib.unpack = string.unpack
+  lib.zerostring = "z"
+  lib.prefixstring = function(bytes)
+    if bytes then return string.format("s%d", bytes)
+    else return "s" end
+  end
+else
+  local struct = require("struct")
+  lib.size = struct.size
+  lib.unpack = struct.unpack
+  lib.zerostring = "s"
+  lib.prefixstring = function(bytes)
+    if bytes then return string.format("I%dc0", bytes)
+    else return "%Tc0" end
+  end
+end
+
+local unpack = unpack or table.unpack
 
 local Blob = {}
 
@@ -47,7 +67,7 @@ Blob.unpack = function(self, formatstring, ...)
     formatstring = string.format(formatstring, ...)
   end
 
-  unpacked = {struct.unpack(formatstring,
+  unpacked = {lib.unpack(formatstring,
     self.buffer, self.pos + self.offset)}
   -- The new position is the last entry of that table
   self.pos = table.remove(unpacked)
@@ -58,7 +78,7 @@ end
 Blob.size = function(self, ...)
   local total = 0
   for _, f in ipairs({...}) do
-    total = total + struct.size(f)
+    total = total + lib.size(f)
   end
   return total
 end
@@ -128,8 +148,8 @@ Blob.types = {
   end,
   word = "c2",
   dword = "c4",
-  zerostring = "s",
-  
+  zerostring = lib.zerostring,
+  prefixstring = lib.prefixstring,  
 }
 
 -- Create a new blob from a given binary string

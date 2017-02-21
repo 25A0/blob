@@ -1,5 +1,25 @@
 local Blob = require("Blob")
-local struct = require("struct")
+local lib = {}
+if string.packsize and string.pack then
+  lib.size = string.packsize
+  lib.pack = string.pack
+  lib.zerostring = "z"
+  lib.prefixstring = function(bytes)
+    if bytes then return string.format("s%d", bytes)
+    else return "s" end
+  end
+else
+  local struct = require("struct")
+  lib.size = struct.size
+  lib.pack = struct.pack
+  lib.zerostring = "s"
+  lib.prefixstring = function(bytes)
+    if bytes then return string.format("I%dc0", bytes)
+    else return "%Tc0" end
+  end
+end
+
+local unpack = unpack or table.unpack
 
 -- Test initialization
 do
@@ -70,7 +90,7 @@ do
   local blob = Blob.new("xkcdabcd1234")
   local a, b = blob:unpack("c2c2")
   assert(a == "xk" and b == "cd")
-  local list = {blob:unpack("cccc")}
+  local list = {blob:unpack("c1c1c1c1")}
   assert(#list == 4)
   assert(unpack(list) == "a", "b", "c", "d")
 end
@@ -186,23 +206,23 @@ end
 do
   local binstrings = {}
   table.insert(binstrings, "BLOB")
-  table.insert(binstrings, struct.pack("I2", 113))
+  table.insert(binstrings, lib.pack("I2", 113))
   table.insert(binstrings, "AUTH")
   local email = "guy@host.com"
-  table.insert(binstrings, struct.pack("s", email))
+  table.insert(binstrings, lib.pack(lib.zerostring, email))
   local len = #email + 1 + 4 + 4 + 2
-  table.insert(binstrings, struct.pack(string.rep("x", 16 - (len % 16))))
+  table.insert(binstrings, lib.pack(string.rep("x", 16 - (len % 16))))
 
-  table.insert(binstrings, struct.pack("I2", 3))
+  table.insert(binstrings, lib.pack("I2", 3))
   local c = {}
   for i=1,3 do
     local x, y = math.random(), math.random()
     local r, g, b = math.random(), math.random(), math.random()
     table.insert(c, {x, y, r, g, b})
     local padding
-    if struct.size("ddddd") % 2 > 0 then padding = "x" else padding = "" end
+    if lib.size("ddddd") % 2 > 0 then padding = "x" else padding = "" end
     table.insert(binstrings, 
-      struct.pack("ddddd"..padding, x, y, r, g, b)
+      lib.pack("ddddd"..padding, x, y, r, g, b)
     )
   end
 
