@@ -83,6 +83,9 @@ local count = blob:unpack("I2")
 -- Now parse the list
 local list = blob:array(count, function(blob)
 	return {
+		-- The format string in `vector` captures multiple values at once.
+		-- By surrounding the call with curly braces, we make sure that all
+		-- captured values are stored in `pos` and `color`.
 		pos = {blob:vector(2)},
 		color = {blob:vector(3)},
     	-- The elements are word-aligned.
@@ -126,6 +129,16 @@ end)
 	local bytes = blob:unpack("I2")
 	-- Read that many bytes
 	local data = blob:unpack("c%d", bytes)
+```
+Both variants of `blob:unpack` can be used with format strings that capture
+multiple values (e.g. `"c8I4"`). In these cases, the calls will return all those
+values. They can be captured in various ways:
+
+```
+    -- assign the captured values to individual variables
+	local r, g, b, a = blob:unpack("BBBB")
+	-- store all captured values in a table
+	local coords = {blob:unpack("dd")}
 ```
 
  - `blob:size(formatstring)` returns the size of the given format string.
