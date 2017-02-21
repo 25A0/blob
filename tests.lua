@@ -1,4 +1,5 @@
 local Blob = require("Blob")
+local struct = require("struct")
 
 -- Test initialization
 do
@@ -42,6 +43,15 @@ do
   assert(blob:byte() == "k")
 end
 
+-- Test custom types across instances
+do
+  local blob1 = Blob.new("xkcd")
+  Blob.types.pair = "c2"
+  assert(blob1:pair() == "xk")
+  local blob2 = Blob.new("1234")
+  assert(blob2:pair() == "12")
+end
+
 -- Test array
 do
   local blob = Blob.new("xkcdabcd1234")
@@ -60,6 +70,9 @@ do
   local blob = Blob.new("xkcdabcd1234")
   local a, b = blob:unpack("c2c2")
   assert(a == "xk" and b == "cd")
+  local list = {blob:unpack("cccc")}
+  assert(#list == 4)
+  assert(unpack(list) == "a", "b", "c", "d")
 end
 
 -- Test array with multiple return values
@@ -125,6 +138,11 @@ do
   blob:restore("unpadded")
   blob:pad("c8")
   assert(blob.pos == 25)
+
+  -- test case from the readme
+  blob:seek(23)
+  blob:pad("dword")
+  assert(blob.pos == 25)
 end
 
 -- Test size
@@ -162,4 +180,93 @@ end
 do
   local blob = Blob.new("xkcdabcd1234")
   assert(blob:unpack("c%d", 4) == "xkcd")
+end
+
+-- Test "quick tour" code from the Readme
+do
+  local binstrings = {}
+  table.insert(binstrings, "BLOB")
+  table.insert(binstrings, struct.pack("I2", 113))
+  table.insert(binstrings, "AUTH")
+  local email = "guy@host.com"
+  table.insert(binstrings, struct.pack("s", email))
+  local len = #email + 1 + 4 + 4 + 2
+  table.insert(binstrings, struct.pack(string.rep("x", 16 - (len % 16))))
+
+  table.insert(binstrings, struct.pack("I2", 3))
+  local c = {}
+  for i=1,3 do
+    local x, y = math.random(), math.random()
+    local r, g, b = math.random(), math.random(), math.random()
+    table.insert(c, {x, y, r, g, b})
+    local padding
+    if struct.size("ddddd") % 2 > 0 then padding = "x" else padding = "" end
+    table.insert(binstrings, 
+      struct.pack("ddddd"..padding, x, y, r, g, b)
+    )
+  end
+
+  -- README code below
+
+  -- load the content of a binary file
+  local blob = Blob.new(table.concat(binstrings))
+
+  -- The first four bytes should contain the string "BLOB"
+  assert(blob:bytes(4) == "BLOB")
+
+  -- This is followed by the version, stored as a 2 byte unsigned integer
+  local version = blob:unpack("I2")
+  assert(version == 113)
+
+  -- Since version 1.1 of this file format, there might be a field tagged
+  -- "AUTH", followed by the email-address of the author.
+  local author
+
+  -- We save our current position; if there is no "AUTH" field, we will
+  -- want to continue parsing from here
+  blob:mark()
+
+  if version >= 110 and blob:bytes(4) == "AUTH" then
+    -- there is an "AUTH" field. We can forget about our saved position
+    blob:drop()
+    --  the author's email address is a zero-terminated String
+    author = blob:zerostring()
+  else
+    -- there was no author field, so we want to go back to where we left off
+    blob:restore()
+  end
+  assert(author == email, author.." " ..email)
+
+  -- We want to skip padding bytes to the next 16 byte boundary
+  blob:pad(16)
+
+  -- Create a custom type that can parse 2D or 3D vectors
+  blob.types.vector = function(dimensions)
+  -- The vector has one double value per dimension
+  return string.rep("d", dimensions)
+  end
+
+  -- Parse a list of pairs of 2D coordinates and a three-dimensional color vector.
+  -- The number of elements is stored as a two byte unsigned integer
+  local count = blob:unpack("I2")
+  assert(count == 3)
+
+  -- Now parse the list
+  local list = blob:array(count, function(blob)
+    return {
+      pos = {blob:vector(2)},
+      color = {blob:vector(3)},
+      -- The elements are word-aligned.
+      blob:pad("word"),
+    }
+  end)
+
+  for i=1,count do
+    assert(list[i].pos[1] == c[i][1])
+    assert(list[i].pos[2] == c[i][2])
+    assert(list[i].color[1] == c[i][3])
+    assert(list[i].color[2] == c[i][4])
+    assert(list[i].color[3] == c[i][5])
+  end
+
 end
