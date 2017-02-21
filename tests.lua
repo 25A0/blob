@@ -284,3 +284,83 @@ do
   end
 
 end
+
+-- Test "quick tour" code from the Readme
+do
+  local binstrings = {}
+  table.insert(binstrings, "BLOB")
+  table.insert(binstrings, lib.pack("I2", 102))
+  local len = 4 + 2
+  table.insert(binstrings, lib.pack(string.rep("x", 16 - (len % 16))))
+
+  table.insert(binstrings, lib.pack("I2", 3))
+  local c = {}
+  for i=1,3 do
+    local x, y = math.random(), math.random()
+    local r, g, b = math.random(), math.random(), math.random()
+    table.insert(c, {x, y, r, g, b})
+    local padding
+    if lib.size("ddddd") % 2 > 0 then padding = "x" else padding = "" end
+    table.insert(binstrings, 
+      lib.pack("ddddd"..padding, x, y, r, g, b)
+    )
+  end
+
+  -- README code below
+
+  -- load the content of a binary file
+  local blob = Blob.new(table.concat(binstrings))
+
+  -- The first four bytes should contain the string "BLOB"
+  assert(blob:bytes(4) == "BLOB")
+
+  -- This is followed by the version, stored as a 2 byte unsigned integer
+  local version = blob:unpack("I2")
+  assert(version == 102)
+
+  -- Since version 1.1 of this file format, there might be a field tagged
+  -- "AUTH", followed by the email-address of the author.
+  local author
+
+  if version >= 110 and blob:bytes(4) == "AUTH" then
+    --  the author's email address is a zero-terminated String
+    author = blob:zerostring()
+  else
+    -- there was no author field, so we want to go back to where we left off
+    blob:rollback()
+  end
+  assert(author == nil)
+
+  -- We want to skip padding bytes to the next 16 byte boundary
+  blob:pad(16)
+
+  -- Create a custom type that can parse 2D or 3D vectors
+  blob.types.vector = function(dimensions)
+  -- The vector has one double value per dimension
+  return string.rep("d", dimensions)
+  end
+
+  -- Parse a list of pairs of 2D coordinates and a three-dimensional color vector.
+  -- The number of elements is stored as a two byte unsigned integer
+  local count = blob:unpack("I2")
+  assert(count == 3)
+
+  -- Now parse the list
+  local list = blob:array(count, function(blob)
+    return {
+      pos = {blob:vector(2)},
+      color = {blob:vector(3)},
+      -- The elements are word-aligned.
+      blob:pad("word"),
+    }
+  end)
+
+  for i=1,count do
+    assert(list[i].pos[1] == c[i][1])
+    assert(list[i].pos[2] == c[i][2])
+    assert(list[i].color[1] == c[i][3])
+    assert(list[i].color[2] == c[i][4])
+    assert(list[i].color[3] == c[i][5])
+  end
+
+end
