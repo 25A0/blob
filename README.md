@@ -112,8 +112,9 @@ end)
 ### Parsing
 
  - `blob:unpack(formatstring)` unpacks a bunch of bytes according to the given
- 	format string. See http://www.lua.org/manual/5.3/manual.html#6.4.2 for valid
- 	format strings, or http://www.inf.puc-rio.br/~roberto/struct/ if you are using
+ 	format string, and advance the offset by the number of consumed bytes.
+ 	See http://www.lua.org/manual/5.3/manual.html#6.4.2 for valid format
+ 	strings, or http://www.inf.puc-rio.br/~roberto/struct/ if you are using
  	Lua 5.1 or 5.2.
  - `blob:unpack(formatstring, ...)` calls `string.format(formatstring, ...)` and uses
 	the resulting formatstring to unpack bytes.
@@ -138,12 +139,8 @@ values. They can be captured in various ways:
 	local coords = {blob:unpack("dd")}
 ```
 
- - `blob:size(formatstring)` returns the size of the given format string.
- 	This function does not work for format strings containing zero-terminated
- 	or size-prefixed strings.
- - `blob:size(formatstring, ...)` similar to the simple `size` call, but does
- 	in-place string formatting with `string.format(formatstring, ...)` and
- 	calculates the size of the resulting string.
+#### Arrays
+
  - `blob:array(count, fun)` Parse a list of `count` elements by repeatedly parsing
  	the blob using `fun`. The passed function should accept a `blob` and return
  	whatever it parsed. See the tour above for an example.
@@ -152,6 +149,15 @@ values. They can be captured in various ways:
  - `blob:array(count, formatstring, ...)` Apply string formatting with
  	`string.format(formatstring, ...)`, then parse a list of `count` elements
  	by repeatedly unpacking data with `formatstring`.
+
+#### Size
+
+ - `blob:size(formatstring)` returns the size of the given format string.
+ 	This function does not work for format strings containing zero-terminated
+ 	or size-prefixed strings.
+ - `blob:size(formatstring, ...)` similar to the simple `size` call, but does
+ 	in-place string formatting with `string.format(formatstring, ...)` and
+ 	calculates the size of the resulting string.
 
 ### Custom types
 
@@ -173,12 +179,14 @@ Blob.types = {
 ```
 
 These types can be used for parsing: If `mytype` is defined in `Blob.types`,
-then you can use it as a method on a blob to generate a format string.
+then you can use `blob:mytype()` as a method on a blob to generate a format string.
 `blob:word()` is equivalent to `blob:unpack("c2")`,
 and `blob:bytes(i)` is equivalent to `blob:unpack("c%d", i)`.
 
-If the type is stored as a function, then this function should return a valid
-format string.
+If `mytype` is a function, then this function should return a valid
+format string. If `mytype` requires arguments, you can specify them when
+calling the corresponding method: `blob:mytype(a, b)` will call `mytype(a, b)`,
+and use the returned formatstring to unpack data.
 
 Custom types can also be used for padding (see below).
 
