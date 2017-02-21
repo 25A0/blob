@@ -256,6 +256,9 @@ BLOB offers a few workarounds that might help to avoid these problems:
  	This will automatically use either `"z"` or `"s"`, depending on which
  	library is used.
 
+The string `Blob.backend` exposes which library is used internally. It contains
+`"lua"` when BLOB uses the `string` functions of Lua 5.3,
+and `"struct"` when BLOB uses the `struct` library.
 
 ## Example: Parsing RIFF
 

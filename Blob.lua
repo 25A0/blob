@@ -1,3 +1,5 @@
+local Blob = {}
+
 local lib = {}
 if string.packsize and string.unpack then
   lib.size = string.packsize
@@ -7,6 +9,7 @@ if string.packsize and string.unpack then
     if bytes then return string.format("s%d", bytes)
     else return "s" end
   end
+  blob.backend = "lua"
 else
   local struct = require("struct")
   lib.size = struct.size
@@ -16,11 +19,10 @@ else
     if bytes then return string.format("I%dc0", bytes)
     else return "%Tc0" end
   end
+  blob.backend = "struct"
 end
 
 local unpack = unpack or table.unpack
-
-local Blob = {}
 
 -- Mark the current position in the blob with the given name.
 -- If no name is provided, an anonymous marker is pushed to a stack.
