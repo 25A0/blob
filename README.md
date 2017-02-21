@@ -217,10 +217,32 @@ blob.
 
 ## Pitfalls
 
-Compatibility between `string.unpack` and `struct.unpack`:
+BLOB will automatically detect whether `string.unpack` is available. If not, it
+will try to use `struct` as a fall-back.
+However, the APIs of these two libraries are not fully compatible.
+In particular, the following restrictions apply:
 
- - `z` vs `s`
- - no `c0` in `struct`
+ - `struct` offers the format string `"c0"`, which reads a number of characters
+ 	equal to the last parsed numeric value. This does not exist in `sting.unpack`.
+ - `string.unpack` offers the format string `"s[n]"` to unpack a string that is
+ 	prefixed by an `n`-byte unsigned integer. This does not exist in `struct`.
+ - `struct` allows the format string `"c"` to read one character. However this
+ 	is not a legal format string in `string.unpack`. The equivalent format string
+ 	for `string.unpack` is `"c1"`.
+ - A zero-terminated string is decoded as `"s"` in `struct`, but as `"z"` in 
+ 	`string.unpack`.
+
+BLOB offers a few workarounds that might help to avoid these problems:
+
+ - Use the custom type `prefixstring(n)` to decode a string that is prefixed by
+ 	an `n`-byte unsigned integer. This behaves similar to `"s[n]"` in
+ 	`string.unpack`, and will in some cases be enough to replace `"c0"` in `struct`.
+ - Always specify the number of characters in the format string `"c"`, but make
+ 	sure that this number is never 0.
+ - Use the custom type `zerostring()` to decode a zero-terminated string.
+ 	This will automatically use either `"z"` or `"s"`, depending on which
+ 	library is used.
+
 
 ## Example: Parsing RIFF
 
