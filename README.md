@@ -23,7 +23,8 @@ Strings are represented, but Blob tries to take care of all the tedious bits.
 
 Next we will have a look at `my-file.bin`, a made-up piece of binary data that
 we will parse in this example:
-```
+
+```lua
 -- [[ my-file.bin
     (offset)  (                     data                     )  (      ASCII     )
     00000000  42 4c 4f 42 71 00 41 55  54 48 67 75 79 40 68 6f  |BLOBq.AUTHguy@ho|
@@ -124,17 +125,18 @@ end)
 	This is useful for generating format strings on the fly, without having to
 	write the `string.format` boilerplate code every time. Example:
 
-``` 
+``` lua
 	-- Check how many bytes of data are available to read
 	local bytes = blob:unpack("I2")
 	-- Read that many bytes
 	local data = blob:unpack("c%d", bytes)
 ```
+
 Both variants of `blob:unpack` can be used with format strings that capture
 multiple values (e.g. `"c8I4"`). In these cases, the calls will return all those
 values. They can be captured in various ways:
 
-```
+```lua
     -- assign the captured values to individual variables
 	local r, g, b, a = blob:unpack("BBBB")
 	-- store all captured values in a table
@@ -155,7 +157,7 @@ The module `Blob` contains an array `types` where custom types are stored.
 These custom types are stored either as a valid formatting string for simple cases,
 or as a function, for more complex cases. The default types are:
 
-```
+```lua
 Blob.types = {
   byte = "c1",
   bytes = function(count)
@@ -217,7 +219,8 @@ blob.
 
  - You have finished reading the options field of a TCP packet and want to skip
  	to the data field, which starts at the next multiple of 4 bytes:
-```
+
+```lua
 	-- Your current position is 23 (using Lua's indexing). The next byte after
 	-- a 4 byte boundary is at index 25.
 	print(blob.pos) -- 23
@@ -229,18 +232,21 @@ blob.
 
  - You want to skip padding bytes equivalent to the size of a somewhat complex 
 	struct:
-```
+
+```lua
 	blob:pad("c16I4I4I4")
 ```
 
  - You want to skip to the next boundary of 1024 bytes, but the padding is not
 	aligned to the beginning of the blob, but to some other position:
-```
+
+```lua
 	blob:pad(1024, 16)
 ```
 
  - The padding does not follow any alignment; it's just a fixed number of bytes:
-```
+
+```lua
 	blob:pad(32, "absolute")
 ```
 
@@ -280,7 +286,7 @@ and `"struct"` when Blob uses the `struct` library.
 
 Here is how you could parse a generic [RIFF](http://www.tactilemedia.com/info/MCI_Control_Info.html) file with Blob:
 
-```
+```lua
 local Blob = require("Blob")
 
 -- define type for four-character codes
