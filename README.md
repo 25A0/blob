@@ -55,12 +55,12 @@ local version = blob:unpack("I2")
 local author
 
 if version >= 110 and blob:bytes(4) == "AUTH" then
-	-- the author's email address is a zero-terminated String
-	author = blob:zerostring()
+    -- the author's email address is a zero-terminated String
+    author = blob:zerostring()
 else
-	-- there was no author field, so we want to go back to where we left off
-	-- before we checked the four bytes
-	blob:rollback()
+    -- there was no author field, so we want to go back to where we left off
+    -- before we checked the four bytes
+    blob:rollback()
 end
 
 -- We want to skip padding bytes to the next 16 byte boundary
@@ -68,8 +68,8 @@ blob:pad(16)
 
 -- Create a custom type that can parse 2D or 3D vectors
 blob.types.vector = function(dimensions)
-	-- The vector has one double value per dimension
-	return string.rep("d", dimensions)
+    -- The vector has one double value per dimension
+    return string.rep("d", dimensions)
 end
 
 -- Parse a list of pairs of 2D coordinates and a three-dimensional color vector.
@@ -78,15 +78,15 @@ local count = blob:unpack("I2")
 
 -- Now parse the list
 local list = blob:array(count, function(blob)
-	return {
-		-- The format string in `vector` captures multiple values at once.
-		-- By surrounding the call with curly braces, we make sure that all
-		-- captured values are stored in `pos` and `color`.
-		pos = {blob:vector(2)},
-		color = {blob:vector(3)},
-    	-- The elements are word-aligned.
-		blob:pad("word"),
-	}
+    return {
+        -- The format string in `vector` captures multiple values at once.
+        -- By surrounding the call with curly braces, we make sure that all
+        -- captured values are stored in `pos` and `color`.
+        pos = {blob:vector(2)},
+        color = {blob:vector(3)},
+        -- The elements are word-aligned.
+        blob:pad("word"),
+    }
 end)
 ```
 
@@ -95,37 +95,37 @@ end)
 ### Instantiating
 
  - `local blob = Blob.new(string)` creates a new instance from a binary string.
-	You can safely use multiple blobs in parallel.
+    You can safely use multiple blobs in parallel.
 
  - `local blob = Blob.load(filename)` creates a new instance from the content of a file
 
  - `local blob = other_blob:split(length)` branch off a shallow copy of the
- 	`other_blob`. The new copy will have its initial reading position at the current
- 	reading position of `other_blob`. The underlying binary data will not be copied,
- 	but the reading position and markers of the two blobs are independent once
- 	the new blob is created. If a `length` is given, then the `other_blob` will
- 	be advanced by that many bytes.
+    `other_blob`. The new copy will have its initial reading position at the current
+    reading position of `other_blob`. The underlying binary data will not be copied,
+    but the reading position and markers of the two blobs are independent once
+    the new blob is created. If a `length` is given, then the `other_blob` will
+    be advanced by that many bytes.
 
- 	This function is useful in cases where you want to keep an explicit reference
- 	to a portion of the blob.
+    This function is useful in cases where you want to keep an explicit reference
+    to a portion of the blob.
 
 ### Parsing
 
  - `blob:unpack(formatstring)` unpacks a bunch of bytes according to the given
- 	format string, and advance the offset by the number of consumed bytes.
- 	See http://www.lua.org/manual/5.3/manual.html#6.4.2 for valid format
- 	strings, or http://www.inf.puc-rio.br/~roberto/struct/ if you are using
- 	Lua 5.1 or 5.2.
+    format string, and advance the offset by the number of consumed bytes.
+    See http://www.lua.org/manual/5.3/manual.html#6.4.2 for valid format
+    strings, or http://www.inf.puc-rio.br/~roberto/struct/ if you are using
+    Lua 5.1 or 5.2.
  - `blob:unpack(formatstring, ...)` calls `string.format(formatstring, ...)` and uses
-	the resulting formatstring to unpack bytes.
-	This is useful for generating format strings on the fly, without having to
-	write the `string.format` boilerplate code every time. Example:
+    the resulting formatstring to unpack bytes.
+    This is useful for generating format strings on the fly, without having to
+    write the `string.format` boilerplate code every time. Example:
 
 ``` lua
-	-- Check how many bytes of data are available to read
-	local bytes = blob:unpack("I2")
-	-- Read that many bytes
-	local data = blob:unpack("c%d", bytes)
+    -- Check how many bytes of data are available to read
+    local bytes = blob:unpack("I2")
+    -- Read that many bytes
+    local data = blob:unpack("c%d", bytes)
 ```
 
 Both variants of `blob:unpack` can be used with format strings that capture
@@ -134,30 +134,30 @@ values. They can be captured in various ways:
 
 ```lua
     -- assign the captured values to individual variables
-	local r, g, b, a = blob:unpack("BBBB")
-	-- store all captured values in a table
-	local coords = {blob:unpack("dd")}
+    local r, g, b, a = blob:unpack("BBBB")
+    -- store all captured values in a table
+    local coords = {blob:unpack("dd")}
 ```
 
 #### Arrays
 
  - `blob:array(count, fun)` Parse a list of `count` elements by repeatedly parsing
- 	the blob using `fun`. The passed function should accept a `blob` and return
- 	whatever it parsed. See the tour above for an example.
+    the blob using `fun`. The passed function should accept a `blob` and return
+    whatever it parsed. See the tour above for an example.
  - `blob:array(count, formatstring)` Parse a list of `count` elements by repeatedly
- 	unpacking data with `formatstring`.
+    unpacking data with `formatstring`.
  - `blob:array(count, formatstring, ...)` Apply string formatting with
- 	`string.format(formatstring, ...)`, then parse a list of `count` elements
- 	by repeatedly unpacking data with `formatstring`.
+    `string.format(formatstring, ...)`, then parse a list of `count` elements
+    by repeatedly unpacking data with `formatstring`.
 
 #### Size
 
  - `blob:size(formatstring)` returns the size of the given format string.
- 	This function does not work for format strings containing zero-terminated
- 	or size-prefixed strings.
+    This function does not work for format strings containing zero-terminated
+    or size-prefixed strings.
  - `blob:size(formatstring, ...)` similar to the simple `size` call, but does
- 	in-place string formatting with `string.format(formatstring, ...)` and
- 	calculates the size of the resulting string.
+    in-place string formatting with `string.format(formatstring, ...)` and
+    calculates the size of the resulting string.
 
 ### Custom types
 
@@ -196,9 +196,9 @@ in `blob.types` or `Blob.types`.
 Use custom types in `size` or `array` like so:
 
 ```lua
-	local s1 = blob:size(Blob.types.bytes(16))
-	local s2 = blob:size(Blob.types.dword)
-	local list = blob:array(10, Blob.types.bytes(4))
+    local s1 = blob:size(Blob.types.bytes(16))
+    local s2 = blob:size(Blob.types.dword)
+    local list = blob:array(10, Blob.types.bytes(4))
 ```
 
 ### Rollback and Markers
@@ -238,7 +238,7 @@ The `position` is optional, and can be one of the following:
  - a numeric value that defines the position relative to which padding should be applied,
  - the string "absolute", to simply skip a fixed number of padding bytes, or
  - a string that refers to a marker, in which case padding will be aligned
- 	relative to the position of that marker.
+    relative to the position of that marker.
 
 If no position is given, then padding is applied relative to the start of the
 blob.
@@ -246,36 +246,36 @@ blob.
 #### Examples
 
  - You have finished reading the options field of a TCP packet and want to skip
- 	to the data field, which starts at the next multiple of 4 bytes:
+    to the data field, which starts at the next multiple of 4 bytes:
 
 ```lua
-	-- Your current position is 23 (using Lua's indexing). The next byte after
-	-- a 4 byte boundary is at index 25.
-	print(blob.pos) -- 23
-	-- Apply padding to dword boundary ("dword" is a double-word, or 4 bytes)
-	blob:pad("dword")
-	-- This skipped two bytes, as expected
-	print(blob.pos) -- 25
+    -- Your current position is 23 (using Lua's indexing). The next byte after
+    -- a 4 byte boundary is at index 25.
+    print(blob.pos) -- 23
+    -- Apply padding to dword boundary ("dword" is a double-word, or 4 bytes)
+    blob:pad("dword")
+    -- This skipped two bytes, as expected
+    print(blob.pos) -- 25
 ```
 
  - You want to skip padding bytes equivalent to the size of a somewhat complex 
-	struct:
+    struct:
 
 ```lua
-	blob:pad("c16I4I4I4")
+    blob:pad("c16I4I4I4")
 ```
 
  - You want to skip to the next boundary of 1024 bytes, but the padding is not
-	aligned to the beginning of the blob, but to some other position:
+    aligned to the beginning of the blob, but to some other position:
 
 ```lua
-	blob:pad(1024, 16)
+    blob:pad(1024, 16)
 ```
 
  - The padding does not follow any alignment; it's just a fixed number of bytes:
 
 ```lua
-	blob:pad(32, "absolute")
+    blob:pad(32, "absolute")
 ```
 
 ## Pitfalls
@@ -286,25 +286,25 @@ However, the APIs of these two libraries are not fully compatible.
 In particular, the following restrictions apply:
 
  - `struct` offers the format string `"c0"`, which reads a number of characters
- 	equal to the last parsed numeric value. This does not exist in `sting.unpack`.
+    equal to the last parsed numeric value. This does not exist in `sting.unpack`.
  - `string.unpack` offers the format string `"s[n]"` to unpack a string that is
- 	prefixed by an `n`-byte unsigned integer. This does not exist in `struct`.
+    prefixed by an `n`-byte unsigned integer. This does not exist in `struct`.
  - `struct` allows the format string `"c"` to read one character. However this
- 	is not a legal format string in `string.unpack`. The equivalent format string
- 	for `string.unpack` is `"c1"`.
+    is not a legal format string in `string.unpack`. The equivalent format string
+    for `string.unpack` is `"c1"`.
  - A zero-terminated string is decoded as `"s"` in `struct`, but as `"z"` in 
- 	`string.unpack`.
+    `string.unpack`.
 
 Blob offers a few workarounds that might help to avoid these problems:
 
  - Use the custom type `prefixstring(n)` to decode a string that is prefixed by
- 	an `n`-byte unsigned integer. This behaves similar to `"s[n]"` in
- 	`string.unpack`, and will in some cases be enough to replace `"c0"` in `struct`.
+    an `n`-byte unsigned integer. This behaves similar to `"s[n]"` in
+    `string.unpack`, and will in some cases be enough to replace `"c0"` in `struct`.
  - Always specify the number of characters in the format string `"c"`, but make
- 	sure that this number is never 0.
+    sure that this number is never 0.
  - Use the custom type `zerostring()` to decode a zero-terminated string.
- 	This will automatically use either `"z"` or `"s"`, depending on which
- 	library is used.
+    This will automatically use either `"z"` or `"s"`, depending on which
+    library is used.
 
 The string `Blob.backend` exposes which library is used internally. It contains
 `"lua"` when Blob uses the `string` functions of Lua 5.3,
@@ -321,28 +321,28 @@ local Blob = require("Blob")
 Blob.types.fourcc = "c4"
 
 local function parse_chunk(blob)
-	local chunk = {}
-	chunk.id = blob:fourcc()
-	chunk.size = blob:unpack("I4")
-	-- Both RIFF and LIST chunks contain a four character type
-	if chunk.id == "RIFF" or chunk.id == "LIST" then
-		chunk.form_type = blob:fourcc()
+    local chunk = {}
+    chunk.id = blob:fourcc()
+    chunk.size = blob:unpack("I4")
+    -- Both RIFF and LIST chunks contain a four character type
+    if chunk.id == "RIFF" or chunk.id == "LIST" then
+        chunk.form_type = blob:fourcc()
         chunk.nested = {}
         local begin = blob.pos
         while blob.pos < begin + chunk.size do
-      	  table.insert(chunk.nested, parse_chunk(blob))
+          table.insert(chunk.nested, parse_chunk(blob))
         end
-	else
-    	chunk.content = blob:split(chunk.size) -- split off a blob of `size` bytes
+    else
+        chunk.content = blob:split(chunk.size) -- split off a blob of `size` bytes
         blob:pad("word") -- Skip padding to the next word boundary
-	end
+    end
     return chunk
 end
 
 local function parse_riff(blob)
-	local riff = parse_chunk(blob)
-	assert(riff.id == "RIFF")
-	return riff
+    local riff = parse_chunk(blob)
+    assert(riff.id == "RIFF")
+    return riff
 end
 
 -- Create a new Blob with the content of the file
