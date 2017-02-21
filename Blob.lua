@@ -88,7 +88,10 @@ Blob.new = function(string, offset)
     __index = function(self, name)
       if Blob.Alias[name] then 
         return function(_, ...)
-          local formatstring = Blob.Alias[name](...)
+          local formatstring
+          if type(Blob.Alias[name]) == "function" then
+            formatstring = Blob.Alias[name](...)
+          else formatstring = Blob.Alias[name] end
           return self:unpack(formatstring)
         end
       else return Blob[name] end
