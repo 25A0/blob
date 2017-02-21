@@ -96,12 +96,11 @@ Blob.unpack = function(self, formatstring, ...)
   return unpack(unpacked)
 end
 
-Blob.size = function(self, ...)
-  local total = 0
-  for _, f in ipairs({...}) do
-    total = total + lib.size(f)
+Blob.size = function(self, formatstring, ...)
+  if ... then
+    formatstring = string.format(formatstring, ...)
   end
-  return total
+  return lib.size(formatstring)
 end
 
 Blob.array = function(self, limit, fun)
