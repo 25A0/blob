@@ -103,12 +103,22 @@ Blob.size = function(self, formatstring, ...)
   return lib.size(formatstring)
 end
 
-Blob.array = function(self, limit, fun)
+Blob.array = function(self, limit, fun, ...)
   local t = {}
   for i=1,limit do
-    -- fun might return multiple values, but table.insert easily gets confused by that.
-    -- This makes sure that all values are captured
-    local capture = {fun(self)}
+    local capture
+    if type(fun) == "function" then
+      -- fun might return multiple values, but table.insert easily gets confused by that.
+      -- This makes sure that all values are captured
+      capture = {fun(self)}
+    elseif type(fun) == "string" then
+      -- If there are additional arguments, then apply string formatting with them
+      if ... then
+        fun = string.format(fun, ...)
+      end
+
+      capture = {self:unpack(fun)}
+    end
     -- If only one result was captured, unpack that result.
     if #capture == 1 then capture = unpack(capture) end
     table.insert(t, capture)

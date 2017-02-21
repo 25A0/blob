@@ -111,6 +111,27 @@ do
   assert(quads[3][1] == "12" and quads[3][2] == "34")
 end
 
+-- Test array with format strings instead of functions
+do
+  local blob = Blob.new("xkcdabcd1234")
+  local quads = blob:array(3, "c2c2")
+  assert(#quads == 3)
+  assert(quads[1][1] == "xk" and quads[1][2] == "cd")
+  assert(quads[2][1] == "ab" and quads[2][2] == "cd")
+  assert(quads[3][1] == "12" and quads[3][2] == "34")
+end
+
+-- Test array with in-place string formatting
+do
+  local blob = Blob.new("xkcdabcd1234")
+  local count = 2
+  local quads = blob:array(3, "c%dc%d", 2, 2)
+  assert(#quads == 3)
+  assert(quads[1][1] == "xk" and quads[1][2] == "cd")
+  assert(quads[2][1] == "ab" and quads[2][2] == "cd")
+  assert(quads[3][1] == "12" and quads[3][2] == "34")
+end
+
 -- Test padding
 do
   local blob = Blob.new [[

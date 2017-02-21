@@ -147,6 +147,11 @@ values. They can be captured in various ways:
  - `blob:array(count, fun)` Parse a list of `count` elements by repeatedly parsing
  	the blob using `fun`. The passed function should accept a `blob` and return
  	whatever it parsed. See the tour above for an example.
+ - `blob:array(count, formatstring)` Parse a list of `count` elements by repeatedly
+ 	unpacking data with `formatstring`.
+ - `blob:array(count, formatstring, ...)` Apply string formatting with
+ 	`string.format(formatstring, ...)`, then parse a list of `count` elements
+ 	by repeatedly unpacking data with `formatstring`.
 
 ### Custom types
 
@@ -178,11 +183,12 @@ Custom types can also be used for padding (see below).
 Custom types are always shared between instances, no matter if they are stored
 in `blob.types` or `Blob.types`.
 
-Use custom types in `size` like so:
+Use custom types in `size` or `array` like so:
 
 ```lua
 	local s1 = blob:size(Blob.types.bytes(16))
 	local s2 = blob:size(Blob.types.dword)
+	local list = blob:array(10, Blob.types.bytes(4))
 ```
 
 ### Rollback and Markers
@@ -337,4 +343,3 @@ local riff = parse_riff(blob)
 ## TODO
 
  - stateful endianness
- - support custom types and format strings in `array`
