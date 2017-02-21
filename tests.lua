@@ -25,13 +25,21 @@ do
   assert(blob.pos == 2)
 end
 
--- Test bytes
+-- Test custom types
 do
   local blob = Blob.new("xkcd")
   assert(blob:bytes(4) == "xkcd")
   blob:seek(1)
   assert(blob:bytes(1) == "x")
   assert(blob:bytes(3) == "kcd")
+  blob:seek(1)
+  assert(blob:dword() == "xkcd")
+  blob:seek(1)
+  assert(blob:word() == "xk")
+  assert(blob:word() == "cd")
+  blob:seek(1)
+  assert(blob:byte() == "x")
+  assert(blob:byte() == "k")
 end
 
 -- Test array

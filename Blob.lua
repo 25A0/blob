@@ -71,9 +71,12 @@ local Blob = {
 }
 
 Blob.Alias = {
+  byte = "c1",
   bytes = function(count)
     return string.format("c%d", count)
   end,
+  word = "c2",
+  dword = "c4",
   
 }
 
