@@ -58,8 +58,8 @@ end
 -- Test size
 do
   assert(Blob:size("c4") == 4)
-  assert(Blob:size(Blob.Alias.bytes(4)) == 4)
-  assert(Blob:size(Blob.Alias.bytes(4), "c6") == 10)
+  assert(Blob:size(Blob.types.bytes(4)) == 4)
+  assert(Blob:size(Blob.types.bytes(4), "c6") == 10)
 
 end
 

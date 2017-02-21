@@ -70,7 +70,7 @@ local Blob = {
   end,
 }
 
-Blob.Alias = {
+Blob.types = {
   byte = "c1",
   bytes = function(count)
     return string.format("c%d", count)
@@ -89,12 +89,12 @@ Blob.new = function(string, offset)
     markers = {}
   }, {
     __index = function(self, name)
-      if Blob.Alias[name] then 
+      if Blob.types[name] then 
         return function(_, ...)
           local formatstring
-          if type(Blob.Alias[name]) == "function" then
-            formatstring = Blob.Alias[name](...)
-          else formatstring = Blob.Alias[name] end
+          if type(Blob.types[name]) == "function" then
+            formatstring = Blob.types[name](...)
+          else formatstring = Blob.types[name] end
           return self:unpack(formatstring)
         end
       else return Blob[name] end
