@@ -319,7 +319,7 @@ end
 
 -- Create a new Blob with the content of the file
 local blob = Blob.load("some-file.riff")
-local riff = parse_chunk(blob)
+local riff = parse_riff(blob)
 ```
 
 ## TODO
