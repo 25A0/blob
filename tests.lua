@@ -55,6 +55,58 @@ do
   assert(quads[3] == "1234")
 end
 
+-- Test padding
+do
+  local blob = Blob.new [[
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  ]]
+
+  -- test that padding at initial position has no effect
+  blob:pad("word")
+  assert(blob.pos == 1)
+  blob:pad("c256")
+  assert(blob.pos == 1)
+  blob:pad(64)
+  assert(blob.pos == 1)
+
+  -- test actual padding
+  blob:byte()
+  blob:pad("word")
+  assert(blob.pos == 3)
+  blob:pad("I4")
+  assert(blob.pos == 5)
+  blob:pad("c10")
+  assert(blob.pos == 11)
+  blob:pad(32)
+  assert(blob.pos == 33)
+
+  -- test that padding a single byte has no effect
+  blob:pad(1)
+  assert(blob.pos == 33)
+  blob:pad("byte")
+  assert(blob.pos == 33)
+
+  -- test absolute padding
+  blob:pad(30, "absolute")
+  assert(blob.pos == 63)
+
+  -- test relative padding
+  blob:seek(13)
+  blob:mark("beginning")
+  blob:unpack("c6")
+  blob:mark("unpadded")
+  blob:pad("c8", "beginning")
+  assert(blob.pos == 21)
+  blob:restore("unpadded")
+  blob:pad("c8")
+  assert(blob.pos == 25)
+end
+
 -- Test size
 do
   assert(Blob:size("c4") == 4)

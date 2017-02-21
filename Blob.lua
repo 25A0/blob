@@ -72,6 +72,53 @@ Blob.array = function(self, limit, fun)
   return t
 end
 
+Blob.pad = function(self, size, position, ...)
+  -- if no position was specified, calculate the padding relative to the start
+  if position == nil then position = 1
+  -- A position can be a numeric value
+  elseif type(position) == "number" then ; -- skip the other checks
+  -- Padding with absolute position will skip `size` byes:
+  elseif position == "absolute" then ;
+  -- A position can also refer to a previously saved marker
+  elseif self.markers[position] then position = self.markers[position]
+  else
+    error("position must either be nil, a number, \"absolute\", or the name of a saved marker")
+  end
+
+  assert(size, "size must be specified")
+  -- Size can be a number
+  if type(size) == "number" then ; -- skip the other checks
+  -- Size can also refer to a custom type. The varargs can be used to pass
+  -- arguments to that custom type.
+  elseif Blob.types[size] then
+    local formatstring
+    if type(Blob.types[size]) == "function" then
+      formatstring = Blob.types[size](...)
+    else formatstring = Blob.types[size] end
+    size = self:size(formatstring)
+  -- Otherwise we expect size to be a format string that can be passed to
+  -- the size function
+  elseif type(size) == "string" then size = self:size(size)
+  else
+    error("size must either be a number, refer to a custom type, or be a valid format string")
+  end
+
+  if position == "absolute" then
+    self.pos = self.pos + size
+    return
+  end
+
+  local relative_pos = self.pos - position
+
+  -- do not pad if we are at the correct boundary
+  if relative_pos % size == 0 then return
+  else
+    local pad_bytes = size - (relative_pos % size)
+    -- advance position by that many bytes
+    self.pos = self.pos + pad_bytes
+  end
+end
+
 Blob.types = {
   byte = "c1",
   bytes = function(count)
