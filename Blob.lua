@@ -1,74 +1,76 @@
 local struct = require("struct")
 
-local Blob = {
-  -- Mark the current position in the blob with the given name.
-  -- If no name is provided, an anonymous marker is pushed to a stack.
-  mark = function (self, name)
-    if type(name) == "string" then
-      self.markers[name] = self.pos
-    else table.insert(self.markers, self.pos) end
-    return self.pos
-  end,
-  -- Restore the position to the position of the mark with the given name.
-  -- If no name is given, an anonymous marker is popped (and thus removed)
-  -- from a stack
-  restore = function (self, name)
-    -- only drop anonymous markers
-    local pos
-    if type(name) == "string" then pos = self.markers[name]
-    else pos = self:drop(name) end
+local Blob = {}
 
-    self.pos = pos
-    return pos
-  end,
-  -- Drop a marker without altering the position.
-  -- If no name is given, drop the topmost marker from the stack.
-  -- Return the dropped position
-  drop = function (self, name) 
-    if type(name) == "string" then
-      local ret = self.markers[name]
-      self.markers[name] = nil
-      return ret
-    else return table.remove(self.markers) end
-  end,
+-- Mark the current position in the blob with the given name.
+-- If no name is provided, an anonymous marker is pushed to a stack.
+Blob.mark = function (self, name)
+  if type(name) == "string" then
+    self.markers[name] = self.pos
+  else table.insert(self.markers, self.pos) end
+  return self.pos
+end
+
+-- Restore the position to the position of the mark with the given name.
+-- If no name is given, an anonymous marker is popped (and thus removed)
+-- from a stack
+Blob.restore = function (self, name)
+  -- only drop anonymous markers
+  local pos
+  if type(name) == "string" then pos = self.markers[name]
+  else pos = self:drop(name) end
+
+  self.pos = pos
+  return pos
+end
+
+-- Drop a marker without altering the position.
+-- If no name is given, drop the topmost marker from the stack.
+-- Return the dropped position
+Blob.drop = function (self, name) 
+  if type(name) == "string" then
+    local ret = self.markers[name]
+    self.markers[name] = nil
+    return ret
+  else return table.remove(self.markers) end
+end
 
 
-  -- Expose a method to manuall set the position
-  seek = function(self, pos) self.pos = pos end,
+-- Expose a method to manuall set the position
+Blob.seek = function(self, pos) self.pos = pos end
 
-  unpack = function(self, formatstring, ...)
-    local unpacked
-    -- This allows the user to call blob:unpack("%d", myvar)
-    -- instead of creating the formatted string first.
-    if ... then
-      formatstring = string.format(formatstring, ...)
-    end
+Blob.unpack = function(self, formatstring, ...)
+  local unpacked
+  -- This allows the user to call blob:unpack("%d", myvar)
+  -- instead of creating the formatted string first.
+  if ... then
+    formatstring = string.format(formatstring, ...)
+  end
 
-    unpacked, self.pos = struct.unpack(formatstring,
-      self.buffer, self.pos + self.offset)
-    self.pos = self.pos - self.offset
-    return unpacked, self.pos
-  end,
+  unpacked, self.pos = struct.unpack(formatstring,
+    self.buffer, self.pos + self.offset)
+  self.pos = self.pos - self.offset
+  return unpacked, self.pos
+end
 
-  size = function(self, ...)
-    local total = 0
-    for _, f in ipairs({...}) do
-      total = total + struct.size(f)
-    end
-    return total
-  end,
+Blob.size = function(self, ...)
+  local total = 0
+  for _, f in ipairs({...}) do
+    total = total + struct.size(f)
+  end
+  return total
+end
 
-  array = function(self, limit, fun)
-    local t = {}
-    for i=1,limit do
-      -- fun might return multiple values, but table.insert easily gets confused by that.
-      -- This makes sure that only the first value is passed to table.insert.
-      local capture = fun(self)
-      table.insert(t, capture)
-    end
-    return t
-  end,
-}
+Blob.array = function(self, limit, fun)
+  local t = {}
+  for i=1,limit do
+    -- fun might return multiple values, but table.insert easily gets confused by that.
+    -- This makes sure that only the first value is passed to table.insert.
+    local capture = fun(self)
+    table.insert(t, capture)
+  end
+  return t
+end
 
 Blob.types = {
   byte = "c1",
