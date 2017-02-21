@@ -1,8 +1,8 @@
-# Binary Lunar Objects Library
+# Binary Lunar OBjects library
 
 This is a simple helper utility for parsing binary data in Lua.
 
-BLOB is primarily a wrapper around a struct unpack function, spiced up with some
+Blob is primarily a wrapper around a struct unpack function, spiced up with some
 quality of life improvements:
 
  - No need to keep track of your reading offset
@@ -16,10 +16,10 @@ as a fall-back for Lua 5.1 and 5.2.
 
 ## Quick tour
 
-BLOB is designed to help you write sane code for parsing binary data,
+Blob is designed to help you write sane code for parsing binary data,
 but does not try to hide details where precision is necessary.
 You will still need to specify things like endianness and the way in which
-Strings are represented, but BLOB tries to take care of all the tedious bits.
+Strings are represented, but Blob tries to take care of all the tedious bits.
 
 Next we will have a look at `my-file.bin`, a made-up piece of binary data that
 we will parse in this example:
@@ -246,7 +246,7 @@ blob.
 
 ## Pitfalls
 
-BLOB will automatically detect whether `string.unpack` is available. If not, it
+Blob will automatically detect whether `string.unpack` is available. If not, it
 will try to use `struct` as a fall-back.
 However, the APIs of these two libraries are not fully compatible.
 In particular, the following restrictions apply:
@@ -261,7 +261,7 @@ In particular, the following restrictions apply:
  - A zero-terminated string is decoded as `"s"` in `struct`, but as `"z"` in 
  	`string.unpack`.
 
-BLOB offers a few workarounds that might help to avoid these problems:
+Blob offers a few workarounds that might help to avoid these problems:
 
  - Use the custom type `prefixstring(n)` to decode a string that is prefixed by
  	an `n`-byte unsigned integer. This behaves similar to `"s[n]"` in
@@ -273,12 +273,12 @@ BLOB offers a few workarounds that might help to avoid these problems:
  	library is used.
 
 The string `Blob.backend` exposes which library is used internally. It contains
-`"lua"` when BLOB uses the `string` functions of Lua 5.3,
-and `"struct"` when BLOB uses the `struct` library.
+`"lua"` when Blob uses the `string` functions of Lua 5.3,
+and `"struct"` when Blob uses the `struct` library.
 
 ## Example: Parsing RIFF
 
-Here is how you could parse a generic [RIFF](http://www.tactilemedia.com/info/MCI_Control_Info.html) file with BLOB:
+Here is how you could parse a generic [RIFF](http://www.tactilemedia.com/info/MCI_Control_Info.html) file with Blob:
 
 ```
 local Blob = require("Blob")
