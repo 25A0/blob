@@ -242,18 +242,12 @@ do
   -- "AUTH", followed by the email-address of the author.
   local author
 
-  -- We save our current position; if there is no "AUTH" field, we will
-  -- want to continue parsing from here
-  blob:mark()
-
   if version >= 110 and blob:bytes(4) == "AUTH" then
-    -- there is an "AUTH" field. We can forget about our saved position
-    blob:drop()
     --  the author's email address is a zero-terminated String
     author = blob:zerostring()
   else
     -- there was no author field, so we want to go back to where we left off
-    blob:restore()
+    blob:rollback()
   end
   assert(author == email, author.." " ..email)
 

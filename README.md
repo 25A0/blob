@@ -54,18 +54,13 @@ local version = blob:unpack("I2")
 -- "AUTH", followed by the email-address of the author.
 local author
 
--- We save our current position; if there is no "AUTH" field, we will
--- want to continue parsing from here
-blob:mark()
-
 if version >= 110 and blob:bytes(4) == "AUTH" then
-	-- there is an "AUTH" field. We can forget about our saved position
-	blob:drop()
 	-- the author's email address is a zero-terminated String
 	author = blob:zerostring()
 else
 	-- there was no author field, so we want to go back to where we left off
-	blob:restore()
+	-- before we checked the four bytes
+	blob:rollback()
 end
 
 -- We want to skip padding bytes to the next 16 byte boundary

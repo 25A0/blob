@@ -24,6 +24,8 @@ end
 
 local unpack = unpack or table.unpack
 
+Blob.max_rollbacks = 64
+
 -- Mark the current position in the blob with the given name.
 -- If no name is provided, an anonymous marker is pushed to a stack.
 Blob.mark = function (self, name)
@@ -57,6 +59,13 @@ Blob.drop = function (self, name)
   else return table.remove(self.markers) end
 end
 
+Blob.rollback = function (self)
+  local pos = table.remove(self.rollback_points)
+  if pos then self.pos = pos
+  else error("Could not find any rollback points")
+  end
+end
+
 
 -- Expose a method to manuall set the position
 Blob.seek = function(self, pos) self.pos = pos end
@@ -68,6 +77,16 @@ Blob.unpack = function(self, formatstring, ...)
   if ... then
     formatstring = string.format(formatstring, ...)
   end
+
+  -- Store the current position in the table of rollback_points.
+  -- This lets us undo any advancement done with this call.
+  -- Restrict the number of elements in the rollback_points table:
+  while #self.rollback_points >= self.max_rollbacks do
+    -- Remove the oldest elements first
+    table.remove(self.rollback_points, 1)
+  end
+  -- Insert the current position
+  table.insert(self.rollback_points, self.pos)
 
   unpacked = {lib.unpack(formatstring,
     self.buffer, self.pos + self.offset)}
@@ -160,7 +179,8 @@ Blob.new = function(string, offset)
     buffer = string,
     pos = 1,
     offset = offset or 0,
-    markers = {}
+    markers = {},
+    rollback_points = {},
   }, {
     __index = function(self, name)
       if Blob.types[name] then 
