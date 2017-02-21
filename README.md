@@ -176,9 +176,17 @@ Custom types can also be used for padding (see below).
 Custom types are always shared between instances, no matter if they are stored
 in `blob.types` or `Blob.types`.
 
-### Markers
+### Rollback and Markers
 
-You can use markers to easily navigate between special positions in the blob.
+If you parsed some data but then realize that you advanced too far, you can
+return to the previous position with `blob:rollback()`. This will put the reading
+position back to where it was before the most recent `unpack` or comparable
+function was called.
+
+By default, up to 64 of these rollback points are saved before old ones are
+overridden. You can change this limit by changing `Blob.max_rollbacks`.
+
+You can also use markers to easily navigate between special positions in the blob.
 
  - `blob:mark()` creates an anonymous marker and pushes it to a stack.
  - `blob:restore()` removes the topmost anonymous marker from the stack, and moves the reading position to that marker
