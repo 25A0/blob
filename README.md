@@ -21,19 +21,22 @@ but does not try to hide details where precision is necessary.
 You will still need to specify things like endianness and the way in which
 Strings are represented, but BLOB tries to take care of all the tedious bits.
 
+Next we will have a look at `my-file.bin`, a made-up piece of binary data that
+we will parse in this example:
 ```
 -- [[ my-file.bin
-	00000000  42 4c 4f 42 71 00 41 55  54 48 67 75 79 40 68 6f  |BLOBq.AUTHguy@ho|
-	00000010  73 74 2e 63 6f 6d 00 00  00 00 00 00 00 00 00 00  |st.com..........|
-	00000020  03 00 80 d3 20 00 c0 69  e0 3e 76 ac 21 f1 3a d6  |.... ..i.>v.!.:.|
-	00000030  c0 3f d6 5b 70 36 eb 2d  e8 3f 0c b5 3a 15 86 5a  |.?.[p6.-.?..:..Z|
-	00000040  dd 3f dc 18 a2 e0 6d 0c  e1 3f b6 0d 38 c8 da 06  |.?....m..?..8...|
-	00000050  cc 3f 77 2c 30 60 3b 16  a8 3f 85 72 ab 7f 42 b9  |.?w,0`;..?.r..B.|
-	00000060  e5 3f 98 79 eb d0 cb bc  e5 3f 02 d2 7b 13 01 e9  |.?.y.....?..{...|
-	00000070  ed 3f 99 16 31 4c 4c 8b  d8 3f 1e 3e 61 15 0f 9f  |.?..1LL..?.>a...|
-	00000080  e0 3f 89 2e 35 a3 44 97  ea 3f df 66 23 88 6f b3  |.?..5.D..?.f#.o.|
-	00000090  a1 3f a6 be 36 cc 52 5f  ab 3f 0a                 |.?..6.R_.?.|
-	0000009b
+    (offset)  (                     data                     )  (      ASCII     )
+    00000000  42 4c 4f 42 71 00 41 55  54 48 67 75 79 40 68 6f  |BLOBq.AUTHguy@ho|
+    00000010  73 74 2e 63 6f 6d 00 00  00 00 00 00 00 00 00 00  |st.com..........|
+    00000020  03 00 80 d3 20 00 c0 69  e0 3e 76 ac 21 f1 3a d6  |.... ..i.>v.!.:.|
+    00000030  c0 3f d6 5b 70 36 eb 2d  e8 3f 0c b5 3a 15 86 5a  |.?.[p6.-.?..:..Z|
+    00000040  dd 3f dc 18 a2 e0 6d 0c  e1 3f b6 0d 38 c8 da 06  |.?....m..?..8...|
+    00000050  cc 3f 77 2c 30 60 3b 16  a8 3f 85 72 ab 7f 42 b9  |.?w,0`;..?.r..B.|
+    00000060  e5 3f 98 79 eb d0 cb bc  e5 3f 02 d2 7b 13 01 e9  |.?.y.....?..{...|
+    00000070  ed 3f 99 16 31 4c 4c 8b  d8 3f 1e 3e 61 15 0f 9f  |.?..1LL..?.>a...|
+    00000080  e0 3f 89 2e 35 a3 44 97  ea 3f df 66 23 88 6f b3  |.?..5.D..?.f#.o.|
+    00000090  a1 3f a6 be 36 cc 52 5f  ab 3f 0a                 |.?..6.R_.?.|
+    0000009b
 ]]
 local Blob = require("Blob")
 
