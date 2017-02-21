@@ -107,8 +107,10 @@ Blob.array = function(self, limit, fun)
   local t = {}
   for i=1,limit do
     -- fun might return multiple values, but table.insert easily gets confused by that.
-    -- This makes sure that only the first value is passed to table.insert.
-    local capture = fun(self)
+    -- This makes sure that all values are captured
+    local capture = {fun(self)}
+    -- If only one result was captured, unpack that result.
+    if #capture == 1 then capture = unpack(capture) end
     table.insert(t, capture)
   end
   return t

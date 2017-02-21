@@ -92,7 +92,10 @@ do
   assert(a == "xk" and b == "cd")
   local list = {blob:unpack("c1c1c1c1")}
   assert(#list == 4)
-  assert(unpack(list) == "a", "b", "c", "d")
+  assert(list[1] == "a" and
+         list[2] == "b" and
+         list[3] == "c" and
+         list[4] == "d")
 end
 
 -- Test array with multiple return values
@@ -103,9 +106,9 @@ do
   end
   local quads = blob:array(3, quad)
   assert(#quads == 3)
-  assert(quads[1] == "xk", "cd")
-  assert(quads[2] == "ab", "cd")
-  assert(quads[3] == "12", "34")
+  assert(quads[1][1] == "xk" and quads[1][2] == "cd")
+  assert(quads[2][1] == "ab" and quads[2][2] == "cd")
+  assert(quads[3][1] == "12" and quads[3][2] == "34")
 end
 
 -- Test padding
