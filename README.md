@@ -50,17 +50,18 @@ assert(blob:bytes(4) == "BLOB")
 -- This is followed by the version, stored as a 2 byte unsigned integer
 local version = blob:unpack("I2")
 
--- Since version 1.1 of this file format, there might be a field tagged
--- "AUTH", followed by the email-address of the author.
 local author
-
-if version >= 110 and blob:bytes(4) == "AUTH" then
-    -- the author's email address is a zero-terminated String
-    author = blob:zerostring()
-else
-    -- there was no author field, so we want to go back to where we left off
-    -- before we checked the four bytes
-    blob:rollback()
+if version >= 110 then
+    -- Since version 1.1 of this file format, there might be a field tagged
+    -- "AUTH", followed by the email-address of the author.
+    if blob:bytes(4) == "AUTH" then
+        -- the author's email address is a zero-terminated String
+        author = blob:zerostring()
+    else
+        -- there was no author field, so we want to go back to where we left off
+        -- before we checked the four bytes
+        blob:rollback()
+    end
 end
 
 -- We want to skip padding bytes to the next 16 byte boundary
