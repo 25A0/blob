@@ -227,6 +227,30 @@ do
   assert(blob:unpack("c%d", 4) == "xkcd")
 end
 
+-- Test parsing bit flags
+do
+  do
+    local blob = Blob.new(string.char(0x68)) -- 0b0110 1000
+    -- Parse 5 bits from most to least significant, with 1 bit offset
+    local a, b, c, d, e = blob:bits(5, 1)
+    assert(a and b and not c and d and not e)
+  end
+
+  do
+    -- Test without offset
+    local blob = Blob.new(string.char(0xd0)) -- 0b1101 0000
+    local a, b, c, d = blob:bits(4)
+    assert(a and b and not c and d)
+  end
+
+  do
+    -- Test padding of more than one byte
+    local blob = Blob.new(string.char(0x00, 0x34)) -- 0b0000 0000 0011 0100
+    local a, b, c, d = blob:bits(4, 10)
+    assert(a and b and not c and d)
+  end
+end
+
 -- Test "quick tour" code from the Readme
 do
   local binstrings = {}

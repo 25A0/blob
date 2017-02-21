@@ -151,6 +151,47 @@ values. They can be captured in various ways:
     `string.format(formatstring, ...)`, then parse a list of `count` elements
     by repeatedly unpacking data with `formatstring`.
 
+#### Bits
+
+ - `blob:bits(numbits)` Parse a number of bits from the beginning of the next
+    byte(s) (that is, the most-significant bit of the next byte will be parsed
+    first). All `numbits` will be returned as boolean values. 
+
+    This advances the offset by the minimum number of bytes that are necessary
+    to capture all bits (e.g. reading 12 bits will advance the offset by two
+    bytes). Thus, each call of `bits` will advance the offset by at least one
+    byte.
+
+    Example:
+
+```lua
+    --[[
+        Datagram:
+        00 01 02 03 04 05 06 07 bit
+        |-  flags   -| 00 00 00
+    ]]
+
+    -- Capture 5 bits from the beginning of a byte
+    local f1, f2, f3, f4, f5 =  blob:bits(5)
+```
+
+ - `blob:bits(numbits, offset)` Similar to the previous function, but skip 
+    `offset` _bits_ first, and then starts capturing `numbits` bits from most
+    to least significant. 
+
+    Example:
+
+```lua
+    --[[
+        Datagram:
+        00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 bit
+        |-    padding     -| |- flags -|
+    ]]
+
+    -- Capture 4 bits after skipping 7 padding pits on the left
+    local f1, f2, f3, f4 =  blob:bits(4, 7)
+```
+
 #### Size
 
  - `blob:size(formatstring)` returns the size of the given format string.

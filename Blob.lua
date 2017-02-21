@@ -173,6 +173,31 @@ Blob.pad = function(self, size, position, ...)
   end
 end
 
+Blob.bits = function(self, numbits, offset)
+  if not offset then
+    offset = 0
+  end
+
+  local numbytes = math.ceil((offset + numbits) / 8)
+  local bytes = {string.byte(self:bytes(numbytes), 1, numbytes)}
+  local bits = {}
+
+  -- Table that holds divisor for each offset
+  local div = {2^7, 2^6, 2^5, 2^4, 2^3, 2^2, 2^1, 2^0}
+
+  for i,byte in ipairs(bytes) do
+    while offset < 8 and #bits < numbits do
+      local bit = math.floor(byte / div[offset + 1]) % 2 == 1
+      table.insert(bits, bit)
+      offset = offset + 1
+    end
+    -- Reset the offset for the next byte
+    offset = offset - 8
+  end
+
+  return unpack(bits)
+end
+
 Blob.types = {
   byte = "c1",
   bytes = function(count)
