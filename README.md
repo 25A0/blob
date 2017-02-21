@@ -8,7 +8,7 @@ quality of life improvements:
  - No need to keep track of your reading offset
  - Dealing with padding becomes a breeze
  - Define custom types to not repeat yourself
- - Handle uncertainty about what to expect by putting down markers
+ - Handle uncertainty about what to expect by rolling back changes and putting down markers
 
 It preferably uses the `string.unpack` function introduced in Lua 5.3,
 but can also use Roberto Ierusalimschy's struct library (http://www.inf.puc-rio.br/~roberto/struct/)
