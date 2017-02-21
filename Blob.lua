@@ -47,10 +47,12 @@ Blob.unpack = function(self, formatstring, ...)
     formatstring = string.format(formatstring, ...)
   end
 
-  unpacked, self.pos = struct.unpack(formatstring,
-    self.buffer, self.pos + self.offset)
+  unpacked = {struct.unpack(formatstring,
+    self.buffer, self.pos + self.offset)}
+  -- The new position is the last entry of that table
+  self.pos = table.remove(unpacked)
   self.pos = self.pos - self.offset
-  return unpacked, self.pos
+  return unpack(unpacked)
 end
 
 Blob.size = function(self, ...)

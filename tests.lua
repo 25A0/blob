@@ -55,6 +55,26 @@ do
   assert(quads[3] == "1234")
 end
 
+-- Test multiple return values
+do
+  local blob = Blob.new("xkcdabcd1234")
+  local a, b = blob:unpack("c2c2")
+  assert(a == "xk" and b == "cd")
+end
+
+-- Test array with multiple return values
+do
+  local blob = Blob.new("xkcdabcd1234")
+  local function quad(blob)
+    return blob:unpack("c2c2")
+  end
+  local quads = blob:array(3, quad)
+  assert(#quads == 3)
+  assert(quads[1] == "xk", "cd")
+  assert(quads[2] == "ab", "cd")
+  assert(quads[3] == "12", "34")
+end
+
 -- Test padding
 do
   local blob = Blob.new [[
