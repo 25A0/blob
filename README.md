@@ -167,6 +167,8 @@ Blob.types = {
   end,
   word = "c2",
   dword = "c4",
+  zerostring = lib.zerostring, -- see Pitfalls
+  prefixstring = lib.prefixstring, -- see Pitfalls
 }
 ```
 
